@@ -1,13 +1,13 @@
 "use client"
 
 import { useRouter, useSearchParams } from "next/navigation"
-import { useEffect } from "react"
+import { useEffect, Suspense } from "react"
 import { Button } from "@/components/ui/button"
 import { ArrowLeft } from "lucide-react"
 import { useAuth } from "@/lib/auth-context"
 import { CreateCertificateForm } from "@/components/create-certificate-form"
 
-export default function CreateCertificatePage() {
+function CreateCertificatePageContent() {
   const { user, isLoading } = useAuth()
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -37,5 +37,17 @@ export default function CreateCertificatePage() {
         <CreateCertificateForm initialKeyId={initialKeyId} initialHostId={initialHostId} />
       </div>
     </div>
+  )
+}
+
+export default function CreateCertificatePage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="animate-pulse text-muted-foreground">Loading...</div>
+      </div>
+    }>
+      <CreateCertificatePageContent />
+    </Suspense>
   )
 }

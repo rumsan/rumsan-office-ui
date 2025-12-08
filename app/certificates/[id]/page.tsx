@@ -96,7 +96,7 @@ export default function CertificateDetailsPage() {
                     <code className="text-sm bg-muted px-2 py-1 rounded font-mono">
                       {certificate.id}
                     </code>
-                    <CopyButton text={certificate.id} />
+                    <CopyButton textToCopy={certificate.id} />
                   </div>
                 </div>
                 <div>
@@ -151,7 +151,7 @@ export default function CertificateDetailsPage() {
                     <code className="text-sm bg-muted px-2 py-1 rounded font-mono">
                       {certificate.hosts.id}
                     </code>
-                    <CopyButton text={certificate.hosts.id} />
+                    <CopyButton textToCopy={certificate.hosts.id} />
                   </div>
                 </div>
               </div>
@@ -174,7 +174,7 @@ export default function CertificateDetailsPage() {
                     <code className="text-sm bg-muted px-2 py-1 rounded font-mono">
                       {certificate.ssh_keys.id}
                     </code>
-                    <CopyButton text={certificate.ssh_keys.id} />
+                    <CopyButton textToCopy={certificate.ssh_keys.id} />
                   </div>
                 </div>
                 <div>
@@ -188,7 +188,7 @@ export default function CertificateDetailsPage() {
                   <code className="text-xs bg-muted px-3 py-2 rounded font-mono break-all flex-1">
                     {certificate.ssh_keys.public_key}
                   </code>
-                  <CopyButton text={certificate.ssh_keys.public_key} />
+                  <CopyButton textToCopy={certificate.ssh_keys.public_key} />
                 </div>
               </div>
             </CardContent>
@@ -206,7 +206,7 @@ export default function CertificateDetailsPage() {
                   value={certificate.cert}
                   className="w-full h-32 text-xs font-mono bg-muted px-3 py-2 rounded resize-none"
                 />
-                <CopyButton text={certificate.cert} />
+                <CopyButton textToCopy={certificate.cert} />
               </div>
             </CardContent>
           </Card>
