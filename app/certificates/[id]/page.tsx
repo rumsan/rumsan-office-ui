@@ -1,5 +1,7 @@
 "use client"
 
+export const runtime = 'edge'
+
 import { useParams, useRouter } from "next/navigation"
 import { useGetCertificate } from "@/lib/hooks/use-certificates"
 import { useAuth } from "@/lib/auth-context"
