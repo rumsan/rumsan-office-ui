@@ -3,8 +3,10 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
-import { Server } from "lucide-react"
+import { Server, Shield } from "lucide-react"
+import { useRouter } from "next/navigation"
 import type { ServerInfo } from "./dashboard"
 
 interface ServerTableProps {
@@ -13,6 +15,7 @@ interface ServerTableProps {
 }
 
 export function ServerTable({ servers, loading }: ServerTableProps) {
+  const router = useRouter()
   const getStatusColor = (status: ServerInfo["status"]) => {
     switch (status) {
       case "online":
@@ -51,12 +54,12 @@ export function ServerTable({ servers, loading }: ServerTableProps) {
           <Table>
             <TableHeader>
               <TableRow className="bg-muted/30 hover:bg-muted/30">
-                <TableHead className="font-semibold">Server Name</TableHead>
                 <TableHead className="font-semibold">Hostname</TableHead>
-                <TableHead className="font-semibold">IP Address</TableHead>
                 <TableHead className="font-semibold">Status</TableHead>
-                <TableHead className="font-semibold">Role</TableHead>
-                <TableHead className="font-semibold">Last Accessed</TableHead>
+                <TableHead className="font-semibold">Principal</TableHead>
+                <TableHead className="font-semibold">Allowed</TableHead>
+                <TableHead className="font-semibold">Created At</TableHead>
+                <TableHead className="font-semibold text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -64,22 +67,22 @@ export function ServerTable({ servers, loading }: ServerTableProps) {
                 Array.from({ length: 5 }).map((_, i) => (
                   <TableRow key={i}>
                     <TableCell>
-                      <Skeleton className="h-4 w-24" />
-                    </TableCell>
-                    <TableCell>
                       <Skeleton className="h-4 w-40" />
                     </TableCell>
                     <TableCell>
-                      <Skeleton className="h-4 w-24" />
-                    </TableCell>
-                    <TableCell>
                       <Skeleton className="h-4 w-16" />
                     </TableCell>
                     <TableCell>
-                      <Skeleton className="h-4 w-16" />
+                      <Skeleton className="h-4 w-32" />
+                    </TableCell>
+                    <TableCell>
+                      <Skeleton className="h-4 w-12" />
                     </TableCell>
                     <TableCell>
                       <Skeleton className="h-4 w-28" />
+                    </TableCell>
+                    <TableCell>
+                      <Skeleton className="h-4 w-8" />
                     </TableCell>
                   </TableRow>
                 ))
@@ -92,20 +95,30 @@ export function ServerTable({ servers, loading }: ServerTableProps) {
               ) : (
                 servers.map((server) => (
                   <TableRow key={server.id} className="hover:bg-muted/20">
-                    <TableCell className="font-medium font-mono">{server.name}</TableCell>
                     <TableCell className="font-mono text-muted-foreground text-sm">{server.hostname}</TableCell>
-                    <TableCell className="font-mono text-muted-foreground text-sm">{server.ip}</TableCell>
                     <TableCell>
                       <Badge variant="outline" className={getStatusColor(server.status)}>
                         {server.status}
                       </Badge>
                     </TableCell>
+                    <TableCell className="font-mono text-muted-foreground text-sm">{server.principal}</TableCell>
                     <TableCell>
-                      <Badge variant="secondary" className="capitalize">
-                        {server.role}
+                      <Badge variant={server.allowed ? "default" : "secondary"}>
+                        {server.allowed ? "Yes" : "No"}
                       </Badge>
                     </TableCell>
-                    <TableCell className="text-muted-foreground text-sm">{formatDate(server.lastAccessed)}</TableCell>
+                    <TableCell className="text-muted-foreground text-sm">{formatDate(server.created_at)}</TableCell>
+                    <TableCell className="text-right">
+                      <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => router.push(`/certificates/create?host_id=${server.id}`)}
+                          title="Create Certificate"
+                          className="h-8 w-8 p-0"
+                        >
+                          <Shield className="w-4 h-4" />
+                        </Button>
+                    </TableCell>
                   </TableRow>
                 ))
               )}
