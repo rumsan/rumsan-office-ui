@@ -4,7 +4,7 @@ import { useState } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { Wallet, Plus, CheckCircle2, AlertCircle, Loader2 } from "lucide-react"
+import { Wallet, Plus, CheckCircle2, AlertCircle, Loader2, FileSignature } from "lucide-react"
 import { useAuth } from "@/lib/auth-context"
 import { useRouter } from "next/navigation"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
@@ -98,10 +98,16 @@ export function WalletManager() {
                 <CardDescription>Manage your connected wallets</CardDescription>
               </div>
             </div>
-            <Button onClick={handleAddWallet} disabled={addMutation.isPending} className="gap-2">
-              {addMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}
-              {addMutation.isPending ? "Adding..." : "Add Wallet"}
-            </Button>
+            <div className="flex gap-2">
+              <Button onClick={() => router.push('/wallets/sign-message')} variant="outline" className="gap-2">
+                <FileSignature className="w-4 h-4" />
+                Sign Message
+              </Button>
+              <Button onClick={handleAddWallet} disabled={addMutation.isPending} className="gap-2">
+                {addMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}
+                {addMutation.isPending ? "Adding..." : "Add Wallet"}
+              </Button>
+            </div>
           </div>
         </CardHeader>
         <CardContent>

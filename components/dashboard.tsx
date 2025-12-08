@@ -5,11 +5,13 @@ import { useRouter } from "next/navigation"
 import { DashboardHeader } from "./dashboard-header"
 import { ServerTable } from "./server-table"
 import { SSHKeyManager } from "./ssh-key-manager"
-import { CertificateDownload } from "./certificate-download"
+import { CertificateTable } from "./certificate-table"
 import { WalletManager } from "./wallet-manager"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Server, Key, Download, Wallet } from "lucide-react"
+import { Server, Key, FileText, Wallet } from "lucide-react"
 import { useAuth } from "@/lib/auth-context"
+import { useServers } from "@/lib/hooks/use-servers"
+import { useCertificates } from "@/lib/hooks/use-certificates"
 
 export interface ServerInfo {
   id: string
@@ -19,96 +21,32 @@ export interface ServerInfo {
   status: "online" | "offline" | "maintenance"
   lastAccessed: string
   role: string
+  principal: string
+  allowed: boolean
+  created_at: string
 }
 
-// Mock servers data - replace with your API call
-const mockServers: ServerInfo[] = [
-  {
-    id: "1",
-    name: "prod-web-01",
-    hostname: "web01.prod.example.com",
-    ip: "10.0.1.10",
-    status: "online",
-    lastAccessed: "2025-11-24T10:30:00Z",
-    role: "admin",
-  },
-  {
-    id: "2",
-    name: "prod-web-02",
-    hostname: "web02.prod.example.com",
-    ip: "10.0.1.11",
-    status: "online",
-    lastAccessed: "2025-11-23T14:20:00Z",
-    role: "developer",
-  },
-  {
-    id: "3",
-    name: "prod-db-01",
-    hostname: "db01.prod.example.com",
-    ip: "10.0.2.10",
-    status: "online",
-    lastAccessed: "2025-11-22T09:15:00Z",
-    role: "admin",
-  },
-  {
-    id: "4",
-    name: "staging-web-01",
-    hostname: "web01.staging.example.com",
-    ip: "10.1.1.10",
-    status: "maintenance",
-    lastAccessed: "2025-11-20T16:45:00Z",
-    role: "developer",
-  },
-  {
-    id: "5",
-    name: "dev-server-01",
-    hostname: "dev01.example.com",
-    ip: "10.2.1.10",
-    status: "online",
-    lastAccessed: "2025-11-24T08:00:00Z",
-    role: "developer",
-  },
-]
-
 export function Dashboard() {
-  const [servers, setServers] = useState<ServerInfo[]>([])
-  const [loading, setLoading] = useState(true)
   const { user, idToken, isLoading: authLoading } = useAuth()
+  const { data: apiServers = [], isLoading: serversLoading } = useServers(idToken)
+  const { data: certificates = [], isLoading: certificatesLoading } = useCertificates(idToken)
   const router = useRouter()
 
-  useEffect(() => {
-    if (!authLoading && !user) {
-      router.push("/")
-    }
-  }, [user, authLoading, router])
+  // Map API data to ServerInfo format
+  const servers: ServerInfo[] = apiServers.map(server => ({
+    id: server.id,
+    name: server.name,
+    hostname: server.name, // Using name as hostname
+    ip: "", // No IP in API response
+    status: server.status,
+    lastAccessed: server.created_at,
+    role: server.allowed ? "admin" : "user", // Assuming allowed means admin
+    principal: server.principal,
+    allowed: server.allowed,
+    created_at: server.created_at,
+  }))
 
-  useEffect(() => {
-    const fetchServers = async () => {
-      if (!idToken) return
-
-      setLoading(true)
-      try {
-        // TODO: Replace with your actual API call using idToken
-        // const response = await fetch('/api/servers', {
-        //   headers: { Authorization: `Bearer ${idToken}` }
-        // })
-        // const data = await response.json()
-        // setServers(data)
-
-        // Mock delay for demo
-        await new Promise((resolve) => setTimeout(resolve, 500))
-        setServers(mockServers)
-      } catch (error) {
-        console.error("Failed to fetch servers:", error)
-      } finally {
-        setLoading(false)
-      }
-    }
-
-    if (idToken) {
-      fetchServers()
-    }
-  }, [idToken])
+  const loading = serversLoading
 
   // Show loading while checking auth
   if (authLoading || !user) {
@@ -139,8 +77,8 @@ export function Dashboard() {
               My Servers
             </TabsTrigger>
             <TabsTrigger value="certificate" className="gap-2">
-              <Download className="w-4 h-4" />
-              My Certificate
+              <FileText className="w-4 h-4" />
+              My Certificates
             </TabsTrigger>
           </TabsList>
 
@@ -157,7 +95,7 @@ export function Dashboard() {
           </TabsContent>
 
           <TabsContent value="certificate" className="space-y-4">
-            <CertificateDownload />
+            <CertificateTable certificates={certificates} loading={certificatesLoading} />
           </TabsContent>
         </Tabs>
       </main>

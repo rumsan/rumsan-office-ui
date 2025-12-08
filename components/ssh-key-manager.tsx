@@ -6,12 +6,12 @@ import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { Key, Save, CheckCircle2, AlertCircle, Loader2, Plus, Download, Trash2 } from "lucide-react"
+import { Key, Save, CheckCircle2, AlertCircle, Loader2, Plus, Download, Trash2, FileText, Shield } from "lucide-react"
 import { useAuth } from "@/lib/auth-context"
 import { useRouter } from "next/navigation"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { CopyButton } from "@/components/ui/copy-button"
-import { useSSHKeys, useAddSSHKey, useDownloadCertificate, useDeleteSSHKey } from "@/lib/hooks/use-ssh-keys"
+import { useSSHKeys, useAddSSHKey, useDeleteSSHKey } from "@/lib/hooks/use-ssh-keys"
 import { format } from "date-fns"
 
 export function SSHKeyManager() {
@@ -35,7 +35,6 @@ export function SSHKeyManager() {
 
   // Mutations
   const addMutation = useAddSSHKey(token, handleUnauthorized)
-  const downloadMutation = useDownloadCertificate(token, handleUnauthorized)
   const deleteMutation = useDeleteSSHKey(token, handleUnauthorized)
 
   const handleSave = async () => {
@@ -87,30 +86,6 @@ export function SSHKeyManager() {
       setStatus("error")
       setErrorMessage("Failed to save SSH key. Please try again.")
       console.error("Failed to save SSH key:", error)
-    }
-  }
-
-  const handleDownloadCertificate = async (keyId: string) => {
-    if (!token) {
-      handleUnauthorized()
-      return
-    }
-
-    try {
-      const response = await downloadMutation.mutateAsync(keyId)
-      const blob = new Blob([response.certificate], { type: "text/plain" })
-      const url = window.URL.createObjectURL(blob)
-      const a = document.createElement("a")
-      a.href = url
-      a.download = `${keyId}-cert.pub`
-      document.body.appendChild(a)
-      a.click()
-      document.body.removeChild(a)
-      window.URL.revokeObjectURL(url)
-    } catch (error) {
-      console.error("Failed to download certificate:", error)
-      setErrorMessage("Failed to download certificate")
-      setTimeout(() => setErrorMessage(""), 3000)
     }
   }
 
@@ -188,16 +163,11 @@ export function SSHKeyManager() {
                         <Button
                           size="sm"
                           variant="outline"
-                          onClick={() => handleDownloadCertificate(key.id)}
-                          disabled={downloadMutation.isPending}
-                          className="gap-2"
+                          onClick={() => router.push(`/certificates/create?key_id=${key.id}`)}
+                          title="Create Certificate"
+                          className="h-8 w-8 p-0"
                         >
-                          {downloadMutation.isPending ? (
-                            <Loader2 className="w-4 h-4 animate-spin" />
-                          ) : (
-                            <Download className="w-4 h-4" />
-                          )}
-                          {downloadMutation.isPending ? "Downloading..." : "Download"}
+                          <Shield className="w-4 h-4" />
                         </Button>
                         <Button
                           size="sm"
